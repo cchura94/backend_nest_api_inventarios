@@ -27,7 +27,7 @@ const __dirname = dirname(__filename);
       password: process.env.BD_PASSWORD,
       database: process.env.BD_DATABASE,
       entities: [
-        __dirname + '../**/*.entity{.ts,.js}'
+        __dirname + '/**/*.entity{.ts,.js}'
       ],
       synchronize: false,
     }),
