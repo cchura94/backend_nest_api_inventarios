@@ -24,3 +24,8 @@ npm install -D ts-node tsconfig-paths
 ```
 npm i --save @nestjs/config
 ```
+
+### habilitación validación con Class validator
+```
+npm i --save class-validator class-transformer
+```
