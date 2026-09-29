@@ -19,3 +19,8 @@ npm install dotenv
 ```
 npm install -D ts-node tsconfig-paths
 ```
+
+### Para Variables de entorno (.env) dotenv
+```
+npm i --save @nestjs/config
+```
