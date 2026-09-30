@@ -56,6 +56,14 @@ export class UsersService {
     return usuario;
   }
 
+  async buscarUserPorEmail(email: string){
+    const usuario = await this.userRepository.findOneBy({email: email});
+    if(!usuario){
+      throw new NotFoundException("El usuario no se encuentra en la BD");
+    }
+    return usuario;
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
 
     const usuario = await this.findOne(id);

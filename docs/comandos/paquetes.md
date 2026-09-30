@@ -37,3 +37,8 @@ npm i -D @types/bcrypt
 
 ```
 
+### JWT (generaion de Tokens)
+```
+npm i @nestjs/jwt
+
+```
