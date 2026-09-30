@@ -29,3 +29,11 @@ npm i --save @nestjs/config
 ```
 npm i --save class-validator class-transformer
 ```
+
+### cifrado o encriptación de Contraseñas
+```
+npm i bcrypt
+npm i -D @types/bcrypt
+
+```
+

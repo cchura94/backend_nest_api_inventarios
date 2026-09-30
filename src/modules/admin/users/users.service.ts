@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity.js';
 import { In, Repository } from 'typeorm';
 import { Role } from '../role/entities/role.entity.js';
+import bcrypt from "bcrypt"
 
 @Injectable()
 export class UsersService {
@@ -29,11 +30,18 @@ export class UsersService {
       //roles = await this.roleRepository.find({where: {id: In(roleIds)}});
     }
 
+    // encriptar con bcrypt
+    const hashPassword = await bcrypt.hash(restData.password, 12);
+
+
     const nuevoUser = this.userRepository.create({
-      name, email, password: restData.password, roles
+      name, email, password: hashPassword, roles
     })
     
-    return await this.userRepository.save(nuevoUser);
+    const usuarioRegistrado = await this.userRepository.save(nuevoUser);
+    const {password, ...resto_datos} = usuarioRegistrado;
+    return resto_datos;
+
   }
 
   findAll() {
@@ -51,9 +59,36 @@ export class UsersService {
   async update(id: string, updateUserDto: UpdateUserDto) {
 
     const usuario = await this.findOne(id);
+    if(!usuario){
+      throw new NotFoundException('El usuario no se encuentra en la BD');
+    }
 
+    const {email, name, password} = updateUserDto;
 
-    return `This action updates a #${id} user`;
+    // verificar el email
+    if(email && email !== usuario.email){
+      const existeEmail = await this.userRepository.findOne({where: {email: email}});
+      if(existeEmail){
+        throw new BadRequestException(`El Correo ${email} ya está en uso`)
+      }
+
+      usuario.email = email;
+    }
+    
+    // actualizar el nombre
+    if(name !== undefined){
+      usuario.name = name;
+    }
+
+    if(password){
+      usuario.password = await bcrypt.hash(password, 12);
+    }
+
+    const usuarioActualizado = await this.userRepository.save(usuario);
+
+    const {password: _, ...restoDatos} = usuarioActualizado;
+
+    return restoDatos;
   }
 
   async remove(id: string) {
