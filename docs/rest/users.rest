@@ -1,20 +1,23 @@
 ### Listar
 GET http://127.0.0.1:3000/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImVtYWlsIjoiYW5hQG1haWwuY29tIiwiaWF0IjoxNzkwODE4NTUwLCJleHAiOjE3OTA4MjU3NTB9.ejPBKG4zTUtiRHpDgU9GiFEfTGxbWnR1yjXIB36uH5U
 
 ### Guardar
 
 POST http://127.0.0.1:3000/users
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImVtYWlsIjoiYW5hQG1haWwuY29tIiwiaWF0IjoxNzkwODE4NTUwLCJleHAiOjE3OTA4MjU3NTB9.ejPBKG4zTUtiRHpDgU9GiFEfTGxbWnR1yjXIB36uH5U
 
 {
-   "name": "andres",
-   "email": "andres@mail.com",
-   "password": "andres54321",
+   "name": "simon",
+   "email": "simon@mail.com",
+   "password": "simon54321",
    "roleIds": []
 }
 
 ### Mostrar por id
 GET http://127.0.0.1:3000/users/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImVtYWlsIjoiYW5hQG1haWwuY29tIiwiaWF0IjoxNzkwODE4NTUwLCJleHAiOjE3OTA4MjU3NTB9.ejPBKG4zTUtiRHpDgU9GiFEfTGxbWnR1yjXIB36uH5U
 
 ### modificar
 PATCH http://127.0.0.1:3000/users/2

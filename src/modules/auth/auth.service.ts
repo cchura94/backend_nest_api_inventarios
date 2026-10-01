@@ -26,4 +26,9 @@ export class AuthService {
 
         return { usuario, access_token }
     }
+
+    async funGetPerfil(email:string){
+        const { password, ...resto } = await this.userService.buscarUserPorEmail(email);
+        return resto;
+    }
 }

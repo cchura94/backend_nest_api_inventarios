@@ -5,3 +5,7 @@ Content-Type: application/json
     "email": "ana@mail.com",
     "password": "ana54321"
 }
+
+### perfil
+GET http://127.0.0.1:3000/auth/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImVtYWlsIjoiYW5hQG1haWwuY29tIiwiaWF0IjoxNzkwODE4MzkwLCJleHAiOjE3OTA4MjU1OTB9.3ZnQGu8Cd87I6AqVnthM86nX-LjlFomXaxVthP9VAF4
