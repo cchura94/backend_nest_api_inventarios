@@ -32,7 +32,7 @@ export class Producto {
     @Column()
     estado: boolean;
 
-    @ManyToOne(() => Categoria, cat => cat.productos, {eager: true})
+    @ManyToOne("Categoria", "productos", {eager: true})
     categoria: Categoria;
 
     @OneToMany(() => AlmacenProducto, ap => ap.producto)

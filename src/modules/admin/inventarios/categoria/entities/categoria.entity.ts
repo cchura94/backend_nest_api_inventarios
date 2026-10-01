@@ -12,6 +12,6 @@ export class Categoria {
     @Column({type: 'text', nullable: true})
     descripcion: string;
 
-    @OneToMany(() => Producto, prod => prod.categoria)
+    @OneToMany("Producto", "categoria")
     productos: Producto[]
 }
