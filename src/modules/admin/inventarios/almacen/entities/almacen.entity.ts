@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { AlmacenProducto } from "./almacen_producto.entity.js";
-import { Sucursal } from "../../sucursal/entities/sucursal.entity.js";
+import type { Sucursal } from "../../sucursal/entities/sucursal.entity.js";
 
 @Entity()
 export class Almacen {
@@ -18,7 +18,7 @@ export class Almacen {
     descripcion: string;
 
     
-    @ManyToOne(() => Sucursal, suc=> suc.almacenes, {eager: true})
+    @ManyToOne("Sucursal", "almacenes", {eager: true})
     sucursal: Sucursal;
     
     @OneToMany(() => AlmacenProducto, ap=> ap.almacen)
