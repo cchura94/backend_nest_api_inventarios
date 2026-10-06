@@ -42,3 +42,14 @@ npm i -D @types/bcrypt
 npm i @nestjs/jwt
 
 ```
+
+## Para subida de Imagenes
+```
+npm install -D @types/multer
+npm install multer
+```
+
+### Renderizar archivos estaticos (imagen)
+```
+npm install --save @nestjs/serve-static
+```

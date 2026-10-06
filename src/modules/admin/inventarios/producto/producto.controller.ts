@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ProductoService } from './producto.service.js';
 import { CreateProductoDto } from './dto/create-producto.dto.js';
 import { UpdateProductoDto } from './dto/update-producto.dto.js';
 import { ApiQuery } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('producto')
 export class ProductoController {
@@ -42,4 +43,17 @@ export class ProductoController {
   remove(@Param('id') id: string) {
     return this.productoService.remove(+id);
   }
+
+  @Post(':id/actualizar-imagen')
+  @UseInterceptors(FileInterceptor('imagen'))
+  subirImagen(
+    @UploadedFile()
+    file: Express.Multer.File,
+    @Param('id') id: number
+  ){
+
+    return this.productoService.subirImagen(file, id);
+
+  }
+
 }

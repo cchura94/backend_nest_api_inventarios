@@ -10,14 +10,19 @@ import { ClienteproveedorModule } from './modules/admin/clienteproveedor/cliente
 import { NotaModule } from './modules/admin/nota/nota.module.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static'
 
 import { fileURLToPath } from "url";
-import { dirname } from "path";
+import { dirname, join } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads'
+    }),
     ConfigModule.forRoot(),// habilita variables de entorno (process.env)
     TypeOrmModule.forRoot({
       type: 'postgres',

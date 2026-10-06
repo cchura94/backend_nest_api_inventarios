@@ -243,3 +243,6 @@ Content-Type: application/json
   "estado": true,
   "categoriaId": 2
 }
+
+### 
+GET http://127.0.0.1:3000/producto/3
