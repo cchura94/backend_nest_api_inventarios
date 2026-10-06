@@ -1,10 +1,10 @@
 GET http://127.0.0.1:3000/categoria
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImVtYWlsIjoiYW5hQG1haWwuY29tIiwiaWF0IjoxNzkwODIxMjkwLCJleHAiOjE3OTA4Mjg0OTB9.dFmNtDrgDgkW8kQwK5JnEEMfbC9M8-jX6Ip4_Y3c5iw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImVtYWlsIjoiYW5hQG1haWwuY29tIiwiaWF0IjoxNzkxMjQ5NzA4LCJleHAiOjE3OTEyNTY5MDh9.DvBH001tLq8M5fsc01DtR5Wu9YMv2VxnST2nnOL3t-A
 
 ### Guardar
 POST http://127.0.0.1:3000/categoria
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImVtYWlsIjoiYW5hQG1haWwuY29tIiwiaWF0IjoxNzkwODIxMjkwLCJleHAiOjE3OTA4Mjg0OTB9.dFmNtDrgDgkW8kQwK5JnEEMfbC9M8-jX6Ip4_Y3c5iw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImVtYWlsIjoiYW5hQG1haWwuY29tIiwiaWF0IjoxNzkxMjQ5NzA4LCJleHAiOjE3OTEyNTY5MDh9.DvBH001tLq8M5fsc01DtR5Wu9YMv2VxnST2nnOL3t-A
 
 {
     "nombre": "Muebles",

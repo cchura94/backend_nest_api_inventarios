@@ -1,0 +1,245 @@
+GET http://127.0.0.1:3000/producto
+
+#### Guardar
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Arroz",
+  "descripcion": "Arroz de grano largo de primera calidad",
+  "codigo_barra": "7751234567890",
+  "unidad_medida": "kg",
+  "marca": "Campo",
+  "precio_venta_actual": 35.5,
+  "imagen": "uploads/productos/arroz.jpg",
+  "estado": true,
+  "categoriaId": 1
+}
+
+###
+
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Vestido Floral",
+  "descripcion": "Vestido casual para dama con estampado floral",
+  "codigo_barra": "7751000000001",
+  "unidad_medida": "unidad",
+  "marca": "Bella",
+  "precio_venta_actual": 120.5,
+  "imagen": "uploads/productos/vestido_floral.jpg",
+  "estado": true,
+  "categoriaId": 1
+}
+
+###
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Blusa Elegante",
+  "descripcion": "Blusa de manga larga para dama",
+  "codigo_barra": "7751000000002",
+  "unidad_medida": "unidad",
+  "marca": "Dama",
+  "precio_venta_actual": 85.0,
+  "imagen": "uploads/productos/blusa_elegante.jpg",
+  "estado": true,
+  "categoriaId": 1
+}
+###
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Pantalón Jeans",
+  "descripcion": "Pantalón jeans clásico de corte recto para dama",
+  "codigo_barra": "7751000000003",
+  "unidad_medida": "unidad",
+  "marca": "Denim",
+  "precio_venta_actual": 145.9,
+  "imagen": "uploads/productos/pantalon_jeans.jpg",
+  "estado": true,
+  "categoriaId": 1
+}
+###
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Falda Casual",
+  "descripcion": "Falda casual de tela suave para dama",
+  "codigo_barra": "7751000000004",
+  "unidad_medida": "unidad",
+  "marca": "Moda",
+  "precio_venta_actual": 75.5,
+  "imagen": "uploads/productos/falda_casual.jpg",
+  "estado": true,
+  "categoriaId": 1
+}
+###
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Chaqueta de Dama",
+  "descripcion": "Chaqueta moderna para uso casual",
+  "codigo_barra": "7751000000005",
+  "unidad_medida": "unidad",
+  "marca": "Fashion",
+  "precio_venta_actual": 210.0,
+  "imagen": "uploads/productos/chaqueta_dama.jpg",
+  "estado": true,
+  "categoriaId": 1
+}
+###
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Camisa Blanca",
+  "descripcion": "Camisa blanca clásica para dama",
+  "codigo_barra": "7751000000006",
+  "unidad_medida": "unidad",
+  "marca": "Elegance",
+  "precio_venta_actual": 95.0,
+  "imagen": "uploads/productos/camisa_blanca.jpg",
+  "estado": true,
+  "categoriaId": 1
+}
+###
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Suéter de Lana",
+  "descripcion": "Suéter abrigado de lana para dama",
+  "codigo_barra": "7751000000007",
+  "unidad_medida": "unidad",
+  "marca": "Abrigo",
+  "precio_venta_actual": 135.5,
+  "imagen": "uploads/productos/sueter_lana.jpg",
+  "estado": true,
+  "categoriaId": 1
+}
+###
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Mesa de Comedor",
+  "descripcion": "Mesa de comedor de madera para seis personas",
+  "codigo_barra": "7751000000008",
+  "unidad_medida": "unidad",
+  "marca": "MaderArt",
+  "precio_venta_actual": 850.0,
+  "imagen": "uploads/productos/mesa_comedor.jpg",
+  "estado": true,
+  "categoriaId": 2
+}
+###
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Silla de Madera",
+  "descripcion": "Silla de madera resistente para comedor",
+  "codigo_barra": "7751000000009",
+  "unidad_medida": "unidad",
+  "marca": "MaderArt",
+  "precio_venta_actual": 185.5,
+  "imagen": "uploads/productos/silla_madera.jpg",
+  "estado": true,
+  "categoriaId": 2
+}
+###
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Estante de Madera",
+  "descripcion": "Estante de madera con cinco niveles",
+  "codigo_barra": "7751000000010",
+  "unidad_medida": "unidad",
+  "marca": "HogarPlus",
+  "precio_venta_actual": 420.0,
+  "imagen": "uploads/productos/estante_madera.jpg",
+  "estado": true,
+  "categoriaId": 2
+}
+###
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Mesa de Noche",
+  "descripcion": "Mesa de noche de madera con dos cajones",
+  "codigo_barra": "7751000000011",
+  "unidad_medida": "unidad",
+  "marca": "CasaWood",
+  "precio_venta_actual": 260.0,
+  "imagen": "uploads/productos/mesa_noche.jpg",
+  "estado": true,
+  "categoriaId": 2
+}
+###
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Escritorio de Madera",
+  "descripcion": "Escritorio de madera para oficina o estudio",
+  "codigo_barra": "7751000000012",
+  "unidad_medida": "unidad",
+  "marca": "OfiMadera",
+  "precio_venta_actual": 650.0,
+  "imagen": "uploads/productos/escritorio_madera.jpg",
+  "estado": true,
+  "categoriaId": 2
+}
+###
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Cómoda de Madera",
+  "descripcion": "Cómoda de madera con cuatro cajones",
+  "codigo_barra": "7751000000013",
+  "unidad_medida": "unidad",
+  "marca": "CasaWood",
+  "precio_venta_actual": 580.5,
+  "imagen": "uploads/productos/comoda_madera.jpg",
+  "estado": true,
+  "categoriaId": 2
+}
+###
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Banco de Madera",
+  "descripcion": "Banco de madera resistente para interiores",
+  "codigo_barra": "7751000000014",
+  "unidad_medida": "unidad",
+  "marca": "MaderArt",
+  "precio_venta_actual": 120.0,
+  "imagen": "uploads/productos/banco_madera.jpg",
+  "estado": true,
+  "categoriaId": 2
+}
+###
+POST http://127.0.0.1:3000/producto
+Content-Type: application/json
+
+{
+  "nombre": "Librero de Madera",
+  "descripcion": "Librero de madera con cuatro compartimentos",
+  "codigo_barra": "7751000000015",
+  "unidad_medida": "unidad",
+  "marca": "HogarPlus",
+  "precio_venta_actual": 495.0,
+  "imagen": "uploads/productos/librero_madera.jpg",
+  "estado": true,
+  "categoriaId": 2
+}
