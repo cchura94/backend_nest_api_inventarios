@@ -4,6 +4,7 @@ npm run migration:generate --name=create_users_table
 npm run migration:generate --name=create_categorias_table
 npm run migration:generate --name=create_roles_permissions_table
 npm run migration:generate --name=create_inventarios_table
+npm run migration:generate --name=create_notas_movimientos_table
 ```
 
 ### Migrar a la Base de datos
