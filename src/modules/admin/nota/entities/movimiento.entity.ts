@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Nota } from "./nota.entity.js";
+import type { Nota } from "./nota.entity.js";
 import { Producto } from "../../inventarios/producto/entities/producto.entity.js";
 import { Almacen } from "../../inventarios/almacen/entities/almacen.entity.js";
 
@@ -8,7 +8,7 @@ export class Movimiento{
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(()=>Nota, nota => nota.movimientos)
+    @ManyToOne("Nota", "movimientos")
     nota: Nota;
 
     @ManyToOne(() => Producto, {eager: true})

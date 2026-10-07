@@ -1,0 +1,76 @@
+@host = http://127.0.0.1:3000
+
+### Listar
+GET {{host}}/clienteproveedor
+
+### Guardar cliente
+POST {{host}}/clienteproveedor
+Content-Type: application/json
+
+{
+    "tipo": "cliente",
+    "razon_social": "Juan Pérez",
+    "identificacion": "1234567",
+    "direccion": "Av. Siempre Viva 742",
+    "telefono": "77712345",
+    "correo": "juan@mail.com"
+}
+
+### Guardar proveedor
+POST {{host}}/clienteproveedor
+Content-Type: application/json
+
+{
+    "tipo": "proveedor",
+    "razon_social": "Distribuidora Andina S.A.",
+    "identificacion": "99887766",
+    "direccion": "Calle Comercio 100",
+    "telefono": "22233344",
+    "correo": "ventas@andina.com",
+    "estado": true
+}
+
+### Guardar solo con campos obligatorios
+POST {{host}}/clienteproveedor
+Content-Type: application/json
+
+{
+    "tipo": "cliente",
+    "razon_social": "Cliente mínimo"
+}
+
+### Error de validación (tipo inválido, correo inválido) -> 400
+POST {{host}}/clienteproveedor
+Content-Type: application/json
+
+{
+    "tipo": "otro",
+    "razon_social": "",
+    "correo": "no-es-correo"
+}
+
+### Mostrar
+GET {{host}}/clienteproveedor/1
+
+### Mostrar inexistente -> 404
+GET {{host}}/clienteproveedor/9999
+
+### Modificar
+PATCH {{host}}/clienteproveedor/1
+Content-Type: application/json
+
+{
+    "razon_social": "Juan Pérez Actualizado",
+    "telefono": "70000000"
+}
+
+### Desactivar
+PATCH {{host}}/clienteproveedor/1
+Content-Type: application/json
+
+{
+    "estado": false
+}
+
+### Eliminar (409 si tiene notas asociadas)
+DELETE {{host}}/clienteproveedor/1
