@@ -1,0 +1,2460 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CRUD Productos</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- ========================================================= -->
+    <!-- HEADER -->
+    <!-- ========================================================= -->
+
+    <header class="bg-white border-b">
+
+        <div class="max-w-7xl mx-auto px-6 py-5">
+
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        Productos
+                    </h1>
+
+                    <p class="text-sm text-gray-500 mt-1">
+                        Administración de productos
+                    </p>
+                </div>
+
+                <button
+                    onclick="abrirModalCrear()"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium">
+
+                    + Nuevo producto
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ========================================================= -->
+    <!-- CONTENIDO -->
+    <!-- ========================================================= -->
+
+    <main class="max-w-7xl mx-auto px-6 py-6">
+
+
+        <!-- ===================================================== -->
+        <!-- FILTROS -->
+        <!-- ===================================================== -->
+
+        <div class="bg-white rounded-xl border shadow-sm p-5 mb-6">
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+
+                <!-- BUSCAR -->
+
+                <div class="md:col-span-2">
+
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Buscar
+                    </label>
+
+                    <input
+                        id="inputSearch"
+                        type="text"
+                        placeholder="Buscar producto..."
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                </div>
+
+
+                <!-- ESTADO -->
+
+                <div>
+
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Estado
+                    </label>
+
+                    <select
+                        id="selectEstado"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                        <option value="">
+                            Todos
+                        </option>
+
+                        <option value="true">
+                            Activos
+                        </option>
+
+                        <option value="false">
+                            Inactivos
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- LIMITE -->
+
+                <div>
+
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Registros
+                    </label>
+
+                    <select
+                        id="selectLimit"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                        <option value="5">
+                            5
+                        </option>
+
+                        <option value="10">
+                            10
+                        </option>
+
+                        <option value="20">
+                            20
+                        </option>
+
+                        <option value="50">
+                            50
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- TABLA -->
+        <!-- ===================================================== -->
+
+        <div class="bg-white rounded-xl border shadow-sm overflow-hidden">
+
+            <div class="overflow-x-auto">
+
+                <table class="w-full">
+
+                    <thead class="bg-gray-50 border-b">
+
+                        <tr>
+
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
+                                Producto
+                            </th>
+
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
+                                Código
+                            </th>
+
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
+                                Marca
+                            </th>
+
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
+                                Categoría
+                            </th>
+
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
+                                Precio
+                            </th>
+
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
+                                Estado
+                            </th>
+
+                            <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase">
+                                Acciones
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody
+                        id="tablaProductos"
+                        class="divide-y divide-gray-100">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- LOADING -->
+
+            <div
+                id="loading"
+                class="hidden text-center py-10">
+
+                <div class="inline-flex items-center gap-3 text-gray-500">
+
+                    <div class="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+
+                    Cargando...
+
+                </div>
+
+            </div>
+
+
+            <!-- SIN RESULTADOS -->
+
+            <div
+                id="sinResultados"
+                class="hidden text-center py-12">
+
+                <div class="text-5xl mb-3">
+                    📦
+                </div>
+
+                <p class="font-semibold text-gray-700">
+                    No se encontraron productos
+                </p>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- PAGINACIÓN -->
+            <!-- ================================================= -->
+
+            <div class="border-t px-6 py-4">
+
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+                    <p
+                        id="informacionPaginacion"
+                        class="text-sm text-gray-500">
+                    </p>
+
+                    <div
+                        id="paginacion"
+                        class="flex gap-1">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- ========================================================= -->
+    <!-- MODAL CREAR / EDITAR -->
+    <!-- ========================================================= -->
+
+    <div
+        id="modalProducto"
+        class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+
+
+            <!-- HEADER -->
+
+            <div class="px-6 py-5 border-b flex justify-between items-center">
+
+                <div>
+
+                    <h2
+                        id="tituloModal"
+                        class="text-xl font-bold">
+
+                        Nuevo producto
+
+                    </h2>
+
+                    <p class="text-sm text-gray-500 mt-1">
+                        Información del producto
+                    </p>
+
+                </div>
+
+                <button
+                    onclick="cerrarModalProducto()"
+                    class="text-gray-400 hover:text-gray-700 text-2xl">
+
+                    ×
+
+                </button>
+
+            </div>
+
+
+            <!-- FORM -->
+
+            <form
+                id="formProducto"
+                class="p-6">
+
+                <input
+                    type="hidden"
+                    id="productoId">
+
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+
+                    <!-- NOMBRE -->
+
+                    <div class="md:col-span-2">
+
+                        <label class="block text-sm font-medium mb-2">
+                            Nombre *
+                        </label>
+
+                        <input
+                            id="nombre"
+                            type="text"
+                            required
+                            class="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                    </div>
+
+
+                    <!-- DESCRIPCIÓN -->
+
+                    <div class="md:col-span-2">
+
+                        <label class="block text-sm font-medium mb-2">
+                            Descripción *
+                        </label>
+
+                        <textarea
+                            id="descripcion"
+                            rows="3"
+                            required
+                            class="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+
+                    </div>
+
+
+                    <!-- CODIGO -->
+
+                    <div>
+
+                        <label class="block text-sm font-medium mb-2">
+                            Código de barra
+                        </label>
+
+                        <input
+                            id="codigo_barra"
+                            type="text"
+                            class="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                    </div>
+
+
+                    <!-- UNIDAD -->
+
+                    <div>
+
+                        <label class="block text-sm font-medium mb-2">
+                            Unidad de medida
+                        </label>
+
+                        <input
+                            id="unidad_medida"
+                            type="text"
+                            placeholder="unidad, kg, litro..."
+                            class="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                    </div>
+
+
+                    <!-- MARCA -->
+
+                    <div>
+
+                        <label class="block text-sm font-medium mb-2">
+                            Marca
+                        </label>
+
+                        <input
+                            id="marca"
+                            type="text"
+                            class="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                    </div>
+
+
+                    <!-- PRECIO -->
+
+                    <div>
+
+                        <label class="block text-sm font-medium mb-2">
+                            Precio venta *
+                        </label>
+
+                        <input
+                            id="precio_venta_actual"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            required
+                            class="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                    </div>
+
+
+                    <!-- CATEGORIA -->
+
+                    <div>
+
+                        <label class="block text-sm font-medium mb-2">
+                            Categoría ID
+                        </label>
+
+                        <input
+                            id="categoriaId"
+                            type="number"
+                            class="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                    </div>
+
+
+                    <!-- ESTADO -->
+
+                    <div>
+
+                        <label class="block text-sm font-medium mb-2">
+                            Estado
+                        </label>
+
+                        <select
+                            id="estado"
+                            class="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                            <option value="true">
+                                Activo
+                            </option>
+
+                            <option value="false">
+                                Inactivo
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BOTONES -->
+
+                <div class="flex justify-end gap-3 border-t mt-6 pt-5">
+
+                    <button
+                        type="button"
+                        onclick="cerrarModalProducto()"
+                        class="px-5 py-2.5 border rounded-lg hover:bg-gray-50">
+
+                        Cancelar
+
+                    </button>
+
+                    <button
+                        id="btnGuardar"
+                        type="submit"
+                        class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
+
+                        Guardar producto
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- MODAL VER -->
+    <!-- ========================================================= -->
+
+    <div
+        id="modalVer"
+        class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg">
+
+            <div class="px-6 py-5 border-b flex justify-between items-center">
+
+                <h2 class="text-xl font-bold">
+                    Detalle del producto
+                </h2>
+
+                <button
+                    onclick="cerrarModalVer()"
+                    class="text-gray-400 hover:text-gray-700 text-2xl">
+
+                    ×
+
+                </button>
+
+            </div>
+
+            <div
+                id="detalleProducto"
+                class="p-6">
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- MODAL SUBIR IMAGEN -->
+    <!-- ========================================================= -->
+
+    <div
+        id="modalImagen"
+        class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
+
+
+            <!-- HEADER -->
+
+            <div class="px-6 py-5 border-b flex justify-between items-center">
+
+                <div>
+
+                    <h2 class="text-xl font-bold">
+                        Subir imagen
+                    </h2>
+
+                    <p class="text-sm text-gray-500 mt-1">
+                        Selecciona una imagen para el producto
+                    </p>
+
+                </div>
+
+                <button
+                    onclick="cerrarModalImagen()"
+                    class="text-gray-400 hover:text-gray-700 text-2xl">
+
+                    ×
+
+                </button>
+
+            </div>
+
+
+            <!-- FORM IMAGEN -->
+
+            <form
+                id="formImagen"
+                class="p-6">
+
+                <input
+                    type="hidden"
+                    id="imagenProductoId">
+
+
+                <!-- INPUT -->
+
+                <label
+                    for="inputImagen"
+                    class="cursor-pointer border-2 border-dashed border-gray-300 hover:border-indigo-500 rounded-xl p-8 flex flex-col items-center text-center">
+
+                    <div class="text-5xl mb-3">
+                        🖼️
+                    </div>
+
+                    <span class="font-medium">
+                        Seleccionar imagen
+                    </span>
+
+                    <span class="text-sm text-gray-400 mt-1">
+                        JPG, PNG o WEBP
+                    </span>
+
+                </label>
+
+
+                <input
+                    id="inputImagen"
+                    name="imagen"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    class="hidden">
+
+
+                <!-- PREVIEW -->
+
+                <div
+                    id="previewImagen"
+                    class="hidden mt-5">
+
+                    <p class="text-sm font-medium mb-2">
+                        Vista previa
+                    </p>
+
+                    <div class="flex justify-center">
+
+                        <img
+                            id="imagenPreview"
+                            src=""
+                            class="w-44 h-44 object-cover rounded-xl border">
+
+                    </div>
+
+                </div>
+
+
+                <p
+                    id="nombreArchivo"
+                    class="text-center text-sm text-gray-500 mt-3">
+                </p>
+
+
+                <!-- BOTONES -->
+
+                <div class="flex justify-end gap-3 border-t mt-6 pt-5">
+
+                    <button
+                        type="button"
+                        onclick="cerrarModalImagen()"
+                        class="px-5 py-2.5 border rounded-lg hover:bg-gray-50">
+
+                        Cancelar
+
+                    </button>
+
+                    <button
+                        id="btnSubirImagen"
+                        type="submit"
+                        class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
+
+                        Subir imagen
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- JAVASCRIPT -->
+    <!-- ========================================================= -->
+
+    <script>
+
+        // =====================================================
+        // CONFIGURACIÓN
+        // =====================================================
+
+        const API_URL = "http://127.0.0.1:3000";
+
+
+        // =====================================================
+        // VARIABLES
+        // =====================================================
+
+        let paginaActual = 1;
+
+        let totalPaginas = 1;
+
+        let productos = [];
+
+        let timeoutBusqueda;
+
+
+        // =====================================================
+        // ELEMENTOS
+        // =====================================================
+
+        const inputSearch =
+            document.getElementById("inputSearch");
+
+        const selectEstado =
+            document.getElementById("selectEstado");
+
+        const selectLimit =
+            document.getElementById("selectLimit");
+
+
+        // =====================================================
+        // URL DE IMAGEN
+        // =====================================================
+
+        function obtenerUrlImagen(imagen) {
+
+            if (!imagen) {
+
+                return "https://placehold.co/80x80?text=IMG";
+
+            }
+
+
+            /*
+             * Si la API ya devuelve una URL completa:
+             *
+             * http://127.0.0.1:3000/uploads/productos/arroz.jpg
+             *
+             * la utilizamos directamente.
+             */
+
+            if (
+                imagen.startsWith("http://") ||
+                imagen.startsWith("https://")
+            ) {
+
+                return imagen;
+
+            }
+
+
+            /*
+             * Si devuelve:
+             *
+             * uploads/productos/arroz.jpg
+             *
+             * convertimos a:
+             *
+             * http://127.0.0.1:3000/uploads/productos/arroz.jpg
+             */
+
+            return `${API_URL}/${imagen.replace(/^\/+/, "")}`;
+
+        }
+
+
+        // =====================================================
+        // CARGAR PRODUCTOS
+        // =====================================================
+
+        async function cargarProductos() {
+
+            const search =
+                inputSearch.value.trim();
+
+            const estado =
+                selectEstado.value;
+
+            const limit =
+                Number(selectLimit.value);
+
+
+            const params =
+                new URLSearchParams();
+
+
+            params.append(
+                "page",
+                paginaActual
+            );
+
+
+            params.append(
+                "limit",
+                limit
+            );
+
+
+            if (search) {
+
+                params.append(
+                    "search",
+                    search
+                );
+
+            }
+
+
+            if (estado !== "") {
+
+                params.append(
+                    "estado",
+                    estado
+                );
+
+            }
+
+
+            mostrarLoading(true);
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_URL}/producto?${params.toString()}`
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Error al obtener productos"
+                    );
+
+                }
+
+
+                const resultado =
+                    await response.json();
+
+
+                console.log(
+                    "Respuesta API:",
+                    resultado
+                );
+
+
+                /*
+                 * Compatible con respuestas como:
+                 *
+                 * {
+                 *   data: [],
+                 *   total: 100
+                 * }
+                 *
+                 * o:
+                 *
+                 * {
+                 *   productos: [],
+                 *   total: 100
+                 * }
+                 */
+
+                if (Array.isArray(resultado)) {
+
+                    productos =
+                        resultado;
+
+                    totalPaginas = 1;
+
+                } else {
+
+                    productos =
+                        resultado.data ||
+                        resultado.productos ||
+                        resultado.items ||
+                        [];
+
+
+                    const total =
+                        resultado.total ||
+                        resultado.totalItems ||
+                        resultado.count ||
+                        productos.length;
+
+
+                    totalPaginas =
+                        Math.max(
+                            1,
+                            Math.ceil(
+                                total / limit
+                            )
+                        );
+
+                }
+
+
+                renderizarProductos();
+
+                renderizarPaginacion();
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                mostrarError(
+                    error.message
+                );
+
+
+            } finally {
+
+                mostrarLoading(false);
+
+            }
+
+        }
+
+
+        // =====================================================
+        // MOSTRAR PRODUCTOS
+        // =====================================================
+
+        function renderizarProductos() {
+
+            const tbody =
+                document.getElementById(
+                    "tablaProductos"
+                );
+
+
+            const sinResultados =
+                document.getElementById(
+                    "sinResultados"
+                );
+
+
+            tbody.innerHTML = "";
+
+
+            if (!productos.length) {
+
+                sinResultados.classList.remove(
+                    "hidden"
+                );
+
+                return;
+
+            }
+
+
+            sinResultados.classList.add(
+                "hidden"
+            );
+
+
+            productos.forEach(
+                producto => {
+
+                    const tr =
+                        document.createElement("tr");
+
+
+                    tr.className =
+                        "hover:bg-gray-50";
+
+
+                    const categoria =
+                        producto.categoria?.nombre ||
+                        producto.categoria?.descripcion ||
+                        "-";
+
+
+                    const urlImagen =
+                        obtenerUrlImagen(
+                            producto.imagen
+                        );
+
+
+                    tr.innerHTML = `
+
+                        <!-- PRODUCTO -->
+
+                        <td class="px-6 py-4">
+
+                            <div class="flex items-center gap-3">
+
+                                <img
+                                    src="${urlImagen}"
+                                    onerror="this.src='https://placehold.co/50x50?text=IMG'"
+                                    class="w-12 h-12 rounded-lg object-cover border">
+
+                                <div>
+
+                                    <p class="font-semibold text-gray-900">
+                                        ${escaparHTML(producto.nombre)}
+                                    </p>
+
+                                    <p class="text-xs text-gray-500">
+                                        ID: ${producto.id}
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- CODIGO -->
+
+                        <td class="px-6 py-4 text-sm text-gray-600">
+
+                            ${producto.codigo_barra || "-"}
+
+                        </td>
+
+
+                        <!-- MARCA -->
+
+                        <td class="px-6 py-4 text-sm text-gray-600">
+
+                            ${producto.marca || "-"}
+
+                        </td>
+
+
+                        <!-- CATEGORIA -->
+
+                        <td class="px-6 py-4 text-sm text-gray-600">
+
+                            ${escaparHTML(categoria)}
+
+                        </td>
+
+
+                        <!-- PRECIO -->
+
+                        <td class="px-6 py-4">
+
+                            <span class="font-semibold">
+
+                                Bs.
+                                ${Number(
+                                    producto.precio_venta_actual || 0
+                                ).toFixed(2)}
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- ESTADO -->
+
+                        <td class="px-6 py-4">
+
+                            ${
+                                producto.estado
+                                ?
+                                `
+                                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                    Activo
+                                </span>
+                                `
+                                :
+                                `
+                                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                    Inactivo
+                                </span>
+                                `
+                            }
+
+                        </td>
+
+
+                        <!-- ACCIONES -->
+
+                        <td class="px-6 py-4">
+
+                            <div class="flex justify-end gap-1">
+
+
+                                <!-- VER -->
+
+                                <button
+                                    onclick="verProducto(${producto.id})"
+                                    title="Ver"
+                                    class="w-9 h-9 rounded-lg hover:bg-gray-100">
+
+                                    👁️
+
+                                </button>
+
+
+                                <!-- EDITAR -->
+
+                                <button
+                                    onclick="editarProducto(${producto.id})"
+                                    title="Editar"
+                                    class="w-9 h-9 rounded-lg hover:bg-gray-100">
+
+                                    ✏️
+
+                                </button>
+
+
+                                <!-- IMAGEN -->
+
+                                <button
+                                    onclick="abrirModalImagen(${producto.id})"
+                                    title="Actualizar imagen"
+                                    class="w-9 h-9 rounded-lg hover:bg-indigo-50 text-indigo-600">
+
+                                    🖼️
+
+                                </button>
+
+
+                                <!-- ESTADO -->
+
+                                <button
+                                    onclick="cambiarEstado(
+                                        ${producto.id},
+                                        ${producto.estado}
+                                    )"
+                                    title="Cambiar estado"
+                                    class="w-9 h-9 rounded-lg hover:bg-gray-100">
+
+                                    ${
+                                        producto.estado
+                                        ? "🔴"
+                                        : "🟢"
+                                    }
+
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    `;
+
+
+                    tbody.appendChild(tr);
+
+                }
+            );
+
+        }
+
+
+        // =====================================================
+        // PAGINACIÓN
+        // =====================================================
+
+        function renderizarPaginacion() {
+
+            const contenedor =
+                document.getElementById(
+                    "paginacion"
+                );
+
+
+            contenedor.innerHTML = "";
+
+
+            document.getElementById(
+                "informacionPaginacion"
+            ).textContent =
+                `Página ${paginaActual} de ${totalPaginas}`;
+
+
+            // ANTERIOR
+
+            const anterior =
+                document.createElement("button");
+
+
+            anterior.textContent =
+                "‹";
+
+
+            anterior.disabled =
+                paginaActual === 1;
+
+
+            anterior.className =
+                "w-9 h-9 border rounded-lg hover:bg-gray-50 disabled:opacity-40";
+
+
+            anterior.onclick =
+                function() {
+
+                    if (paginaActual > 1) {
+
+                        paginaActual--;
+
+                        cargarProductos();
+
+                    }
+
+                };
+
+
+            contenedor.appendChild(
+                anterior
+            );
+
+
+            // NUMEROS
+
+            const inicio =
+                Math.max(
+                    1,
+                    paginaActual - 2
+                );
+
+
+            const fin =
+                Math.min(
+                    totalPaginas,
+                    paginaActual + 2
+                );
+
+
+            for (
+                let i = inicio;
+                i <= fin;
+                i++
+            ) {
+
+                const boton =
+                    document.createElement("button");
+
+
+                boton.textContent =
+                    i;
+
+
+                boton.className =
+                    i === paginaActual
+                    ?
+                    "w-9 h-9 rounded-lg bg-indigo-600 text-white"
+                    :
+                    "w-9 h-9 rounded-lg border hover:bg-gray-50";
+
+
+                boton.onclick =
+                    function() {
+
+                        paginaActual =
+                            i;
+
+                        cargarProductos();
+
+                    };
+
+
+                contenedor.appendChild(
+                    boton
+                );
+
+            }
+
+
+            // SIGUIENTE
+
+            const siguiente =
+                document.createElement("button");
+
+
+            siguiente.textContent =
+                "›";
+
+
+            siguiente.disabled =
+                paginaActual === totalPaginas;
+
+
+            siguiente.className =
+                "w-9 h-9 border rounded-lg hover:bg-gray-50 disabled:opacity-40";
+
+
+            siguiente.onclick =
+                function() {
+
+                    if (
+                        paginaActual <
+                        totalPaginas
+                    ) {
+
+                        paginaActual++;
+
+                        cargarProductos();
+
+                    }
+
+                };
+
+
+            contenedor.appendChild(
+                siguiente
+            );
+
+        }
+
+
+        // =====================================================
+        // CREAR PRODUCTO
+        // =====================================================
+
+        function abrirModalCrear() {
+
+            document.getElementById(
+                "formProducto"
+            ).reset();
+
+
+            document.getElementById(
+                "productoId"
+            ).value = "";
+
+
+            document.getElementById(
+                "tituloModal"
+            ).textContent =
+                "Nuevo producto";
+
+
+            document.getElementById(
+                "btnGuardar"
+            ).textContent =
+                "Guardar producto";
+
+
+            document.getElementById(
+                "modalProducto"
+            ).classList.remove(
+                "hidden"
+            );
+
+        }
+
+
+        // =====================================================
+        // EDITAR
+        // =====================================================
+
+        async function editarProducto(id) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_URL}/producto/${id}`
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "No se pudo obtener el producto"
+                    );
+
+                }
+
+
+                const producto =
+                    await response.json();
+
+
+                document.getElementById(
+                    "productoId"
+                ).value =
+                    producto.id;
+
+
+                document.getElementById(
+                    "nombre"
+                ).value =
+                    producto.nombre || "";
+
+
+                document.getElementById(
+                    "descripcion"
+                ).value =
+                    producto.descripcion || "";
+
+
+                document.getElementById(
+                    "codigo_barra"
+                ).value =
+                    producto.codigo_barra || "";
+
+
+                document.getElementById(
+                    "unidad_medida"
+                ).value =
+                    producto.unidad_medida || "";
+
+
+                document.getElementById(
+                    "marca"
+                ).value =
+                    producto.marca || "";
+
+
+                document.getElementById(
+                    "precio_venta_actual"
+                ).value =
+                    producto.precio_venta_actual || "";
+
+
+                document.getElementById(
+                    "categoriaId"
+                ).value =
+                    producto.categoria?.id || "";
+
+
+                document.getElementById(
+                    "estado"
+                ).value =
+                    String(producto.estado);
+
+
+                document.getElementById(
+                    "tituloModal"
+                ).textContent =
+                    "Editar producto";
+
+
+                document.getElementById(
+                    "btnGuardar"
+                ).textContent =
+                    "Actualizar producto";
+
+
+                document.getElementById(
+                    "modalProducto"
+                ).classList.remove(
+                    "hidden"
+                );
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    error.message
+                );
+
+            }
+
+        }
+
+
+        // =====================================================
+        // GUARDAR / ACTUALIZAR
+        // =====================================================
+
+        document.getElementById(
+            "formProducto"
+        ).addEventListener(
+            "submit",
+            async function(e) {
+
+                e.preventDefault();
+
+
+                const id =
+                    document.getElementById(
+                        "productoId"
+                    ).value;
+
+
+                const datos = {
+
+                    nombre:
+                        document.getElementById(
+                            "nombre"
+                        ).value,
+
+                    descripcion:
+                        document.getElementById(
+                            "descripcion"
+                        ).value,
+
+                    codigo_barra:
+                        document.getElementById(
+                            "codigo_barra"
+                        ).value || null,
+
+                    unidad_medida:
+                        document.getElementById(
+                            "unidad_medida"
+                        ).value || null,
+
+                    marca:
+                        document.getElementById(
+                            "marca"
+                        ).value || null,
+
+                    precio_venta_actual:
+                        Number(
+                            document.getElementById(
+                                "precio_venta_actual"
+                            ).value
+                        ),
+
+                    estado:
+                        document.getElementById(
+                            "estado"
+                        ).value === "true",
+
+                    categoriaId:
+                        Number(
+                            document.getElementById(
+                                "categoriaId"
+                            ).value
+                        )
+
+                };
+
+
+                try {
+
+                    let response;
+
+
+                    if (!id) {
+
+                        response =
+                            await fetch(
+                                `${API_URL}/producto`,
+                                {
+                                    method: "POST",
+
+                                    headers: {
+                                        "Content-Type":
+                                            "application/json"
+                                    },
+
+                                    body:
+                                        JSON.stringify(
+                                            datos
+                                        )
+                                }
+                            );
+
+                    } else {
+
+                        response =
+                            await fetch(
+                                `${API_URL}/producto/${id}`,
+                                {
+                                    method: "PATCH",
+
+                                    headers: {
+                                        "Content-Type":
+                                            "application/json"
+                                    },
+
+                                    body:
+                                        JSON.stringify(
+                                            datos
+                                        )
+                                }
+                            );
+
+                    }
+
+
+                    if (!response.ok) {
+
+                        const error =
+                            await response.text();
+
+                        console.error(error);
+
+                        throw new Error(
+                            "No se pudo guardar el producto"
+                        );
+
+                    }
+
+
+                    alert(
+                        id
+                        ?
+                        "Producto actualizado correctamente"
+                        :
+                        "Producto creado correctamente"
+                    );
+
+
+                    cerrarModalProducto();
+
+                    cargarProductos();
+
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    alert(
+                        error.message
+                    );
+
+                }
+
+            }
+        );
+
+
+        // =====================================================
+        // VER PRODUCTO
+        // =====================================================
+
+        async function verProducto(id) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_URL}/producto/${id}`
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "No se pudo obtener el producto"
+                    );
+
+                }
+
+
+                const producto =
+                    await response.json();
+
+
+                const urlImagen =
+                    obtenerUrlImagen(
+                        producto.imagen
+                    );
+
+
+                const categoria =
+                    producto.categoria?.nombre ||
+                    producto.categoria?.descripcion ||
+                    "-";
+
+
+                document.getElementById(
+                    "detalleProducto"
+                ).innerHTML = `
+
+                    <div class="space-y-5">
+
+
+                        <!-- IMAGEN -->
+
+                        <div class="flex justify-center">
+
+                            <img
+                                src="${urlImagen}"
+                                onerror="this.src='https://placehold.co/200x200?text=IMG'"
+                                class="w-44 h-44 object-cover rounded-xl border">
+
+                        </div>
+
+
+                        <!-- NOMBRE -->
+
+                        <div>
+
+                            <h3 class="text-xl font-bold text-gray-900">
+
+                                ${escaparHTML(
+                                    producto.nombre
+                                )}
+
+                            </h3>
+
+                            <p class="text-gray-500 mt-2">
+
+                                ${escaparHTML(
+                                    producto.descripcion || ""
+                                )}
+
+                            </p>
+
+                        </div>
+
+
+                        <!-- DATOS -->
+
+                        <div class="grid grid-cols-2 gap-4">
+
+
+                            <div class="bg-gray-50 rounded-lg p-4">
+
+                                <p class="text-xs text-gray-500">
+                                    Código
+                                </p>
+
+                                <p class="font-medium mt-1">
+                                    ${producto.codigo_barra || "-"}
+                                </p>
+
+                            </div>
+
+
+                            <div class="bg-gray-50 rounded-lg p-4">
+
+                                <p class="text-xs text-gray-500">
+                                    Marca
+                                </p>
+
+                                <p class="font-medium mt-1">
+                                    ${producto.marca || "-"}
+                                </p>
+
+                            </div>
+
+
+                            <div class="bg-gray-50 rounded-lg p-4">
+
+                                <p class="text-xs text-gray-500">
+                                    Unidad
+                                </p>
+
+                                <p class="font-medium mt-1">
+                                    ${producto.unidad_medida || "-"}
+                                </p>
+
+                            </div>
+
+
+                            <div class="bg-gray-50 rounded-lg p-4">
+
+                                <p class="text-xs text-gray-500">
+                                    Categoría
+                                </p>
+
+                                <p class="font-medium mt-1">
+                                    ${escaparHTML(categoria)}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- PRECIO -->
+
+                        <div class="border-t pt-5 flex justify-between">
+
+                            <span class="text-gray-500">
+                                Precio venta
+                            </span>
+
+                            <span class="text-2xl font-bold text-indigo-600">
+
+                                Bs.
+                                ${Number(
+                                    producto.precio_venta_actual || 0
+                                ).toFixed(2)}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+
+                document.getElementById(
+                    "modalVer"
+                ).classList.remove(
+                    "hidden"
+                );
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    error.message
+                );
+
+            }
+
+        }
+
+
+        // =====================================================
+        // ABRIR MODAL IMAGEN
+        // =====================================================
+
+        function abrirModalImagen(id) {
+
+            document.getElementById(
+                "imagenProductoId"
+            ).value =
+                id;
+
+
+            document.getElementById(
+                "inputImagen"
+            ).value =
+                "";
+
+
+            document.getElementById(
+                "imagenPreview"
+            ).src =
+                "";
+
+
+            document.getElementById(
+                "previewImagen"
+            ).classList.add(
+                "hidden"
+            );
+
+
+            document.getElementById(
+                "nombreArchivo"
+            ).textContent =
+                "";
+
+
+            document.getElementById(
+                "modalImagen"
+            ).classList.remove(
+                "hidden"
+            );
+
+        }
+
+
+        // =====================================================
+        // PREVISUALIZAR ARCHIVO
+        // =====================================================
+
+        document.getElementById(
+            "inputImagen"
+        ).addEventListener(
+            "change",
+            function() {
+
+                const archivo =
+                    this.files[0];
+
+
+                if (!archivo) {
+
+                    return;
+
+                }
+
+
+                // TIPOS PERMITIDOS
+
+                const tiposPermitidos = [
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp"
+                ];
+
+
+                if (
+                    !tiposPermitidos.includes(
+                        archivo.type
+                    )
+                ) {
+
+                    alert(
+                        "Solo se permiten JPG, PNG o WEBP"
+                    );
+
+                    this.value = "";
+
+                    return;
+
+                }
+
+
+                // MAXIMO 5MB
+
+                const maximo =
+                    5 * 1024 * 1024;
+
+
+                if (
+                    archivo.size > maximo
+                ) {
+
+                    alert(
+                        "La imagen no puede superar los 5 MB"
+                    );
+
+                    this.value = "";
+
+                    return;
+
+                }
+
+
+                document.getElementById(
+                    "nombreArchivo"
+                ).textContent =
+                    archivo.name;
+
+
+                /*
+                 * Previsualización local.
+                 *
+                 * Aquí todavía no utilizamos
+                 * API_URL porque el archivo aún
+                 * no fue enviado al servidor.
+                 */
+
+                const reader =
+                    new FileReader();
+
+
+                reader.onload =
+                    function(e) {
+
+                        document.getElementById(
+                            "imagenPreview"
+                        ).src =
+                            e.target.result;
+
+
+                        document.getElementById(
+                            "previewImagen"
+                        ).classList.remove(
+                            "hidden"
+                        );
+
+                    };
+
+
+                reader.readAsDataURL(
+                    archivo
+                );
+
+            }
+        );
+
+
+        // =====================================================
+        // SUBIR IMAGEN
+        // =====================================================
+
+        document.getElementById(
+            "formImagen"
+        ).addEventListener(
+            "submit",
+            async function(e) {
+
+                e.preventDefault();
+
+
+                const id =
+                    document.getElementById(
+                        "imagenProductoId"
+                    ).value;
+
+
+                const input =
+                    document.getElementById(
+                        "inputImagen"
+                    );
+
+
+                const archivo =
+                    input.files[0];
+
+
+                if (!archivo) {
+
+                    alert(
+                        "Debes seleccionar una imagen"
+                    );
+
+                    return;
+
+                }
+
+
+                const boton =
+                    document.getElementById(
+                        "btnSubirImagen"
+                    );
+
+
+                try {
+
+                    boton.disabled = true;
+
+                    boton.textContent =
+                        "Subiendo...";
+
+
+                    /*
+                     * Creamos FormData
+                     */
+
+                    const formData =
+                        new FormData();
+
+
+                    /*
+                     * IMPORTANTE:
+                     *
+                     * El nombre "imagen" debe
+                     * coincidir con:
+                     *
+                     * @UploadedFile()
+                     *
+                     * y FileInterceptor("imagen")
+                     */
+
+                    formData.append(
+                        "imagen",
+                        archivo
+                    );
+
+
+                    /*
+                     * POST
+                     *
+                     * NO colocamos:
+                     *
+                     * Content-Type:
+                     * multipart/form-data
+                     *
+                     * El navegador lo agrega
+                     * automáticamente.
+                     */
+
+                    const response =
+                        await fetch(
+                            `${API_URL}/producto/${id}/actualizar-imagen`,
+                            {
+                                method: "POST",
+
+                                body:
+                                    formData
+                            }
+                        );
+
+
+                    if (!response.ok) {
+
+                        const error =
+                            await response.text();
+
+                        console.error(
+                            error
+                        );
+
+                        throw new Error(
+                            "No se pudo actualizar la imagen"
+                        );
+
+                    }
+
+
+                    let resultado = null;
+
+
+                    try {
+
+                        resultado =
+                            await response.json();
+
+                    } catch (error) {
+
+                        // El backend puede no retornar JSON
+
+                    }
+
+
+                    console.log(
+                        "Respuesta:",
+                        resultado
+                    );
+
+
+                    alert(
+                        "Imagen actualizada correctamente"
+                    );
+
+
+                    cerrarModalImagen();
+
+
+                    /*
+                     * Volvemos a consultar la API.
+                     *
+                     * La nueva imagen ahora llegará
+                     * como:
+                     *
+                     * uploads/productos/imagen.jpg
+                     *
+                     * y obtenerUrlImagen() la
+                     * transformará en:
+                     *
+                     * http://127.0.0.1:3000/
+                     * uploads/productos/imagen.jpg
+                     */
+
+                    cargarProductos();
+
+
+                } catch (error) {
+
+                    console.error(
+                        error
+                    );
+
+                    alert(
+                        error.message
+                    );
+
+
+                } finally {
+
+                    boton.disabled = false;
+
+                    boton.textContent =
+                        "Subir imagen";
+
+                }
+
+            }
+        );
+
+
+        // =====================================================
+        // CAMBIAR ESTADO
+        // =====================================================
+
+        async function cambiarEstado(
+            id,
+            estadoActual
+        ) {
+
+            const nuevoEstado =
+                !estadoActual;
+
+
+            const confirmar =
+                confirm(
+                    nuevoEstado
+                    ?
+                    "¿Deseas activar este producto?"
+                    :
+                    "¿Deseas desactivar este producto?"
+                );
+
+
+            if (!confirmar) {
+
+                return;
+
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_URL}/producto/${id}`,
+                        {
+                            method: "PATCH",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    estado:
+                                        nuevoEstado
+                                })
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "No se pudo cambiar el estado"
+                    );
+
+                }
+
+
+                cargarProductos();
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    error.message
+                );
+
+            }
+
+        }
+
+
+        // =====================================================
+        // CERRAR MODALES
+        // =====================================================
+
+        function cerrarModalProducto() {
+
+            document.getElementById(
+                "modalProducto"
+            ).classList.add(
+                "hidden"
+            );
+
+        }
+
+
+        function cerrarModalVer() {
+
+            document.getElementById(
+                "modalVer"
+            ).classList.add(
+                "hidden"
+            );
+
+        }
+
+
+        function cerrarModalImagen() {
+
+            document.getElementById(
+                "modalImagen"
+            ).classList.add(
+                "hidden"
+            );
+
+        }
+
+
+        // =====================================================
+        // LOADING
+        // =====================================================
+
+        function mostrarLoading(mostrar) {
+
+            const elemento =
+                document.getElementById(
+                    "loading"
+                );
+
+
+            if (mostrar) {
+
+                elemento.classList.remove(
+                    "hidden"
+                );
+
+            } else {
+
+                elemento.classList.add(
+                    "hidden"
+                );
+
+            }
+
+        }
+
+
+        // =====================================================
+        // ERROR
+        // =====================================================
+
+        function mostrarError(mensaje) {
+
+            document.getElementById(
+                "tablaProductos"
+            ).innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="7"
+                        class="text-center py-10 text-red-500">
+
+                        ${escaparHTML(mensaje)}
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+
+        // =====================================================
+        // ESCAPAR HTML
+        // =====================================================
+
+        function escaparHTML(texto) {
+
+            if (
+                texto === null ||
+                texto === undefined
+            ) {
+
+                return "";
+
+            }
+
+
+            return String(texto)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+
+        }
+
+
+        // =====================================================
+        // BUSQUEDA
+        // =====================================================
+
+        inputSearch.addEventListener(
+            "input",
+            function() {
+
+                clearTimeout(
+                    timeoutBusqueda
+                );
+
+
+                timeoutBusqueda =
+                    setTimeout(
+                        function() {
+
+                            paginaActual = 1;
+
+                            cargarProductos();
+
+                        },
+                        400
+                    );
+
+            }
+        );
+
+
+        // =====================================================
+        // FILTRO ESTADO
+        // =====================================================
+
+        selectEstado.addEventListener(
+            "change",
+            function() {
+
+                paginaActual = 1;
+
+                cargarProductos();
+
+            }
+        );
+
+
+        // =====================================================
+        // LIMITE
+        // =====================================================
+
+        selectLimit.addEventListener(
+            "change",
+            function() {
+
+                paginaActual = 1;
+
+                cargarProductos();
+
+            }
+        );
+
+
+        // =====================================================
+        // CERRAR MODAL AL HACER CLICK AFUERA
+        // =====================================================
+
+        document.getElementById(
+            "modalProducto"
+        ).addEventListener(
+            "click",
+            function(e) {
+
+                if (e.target === this) {
+
+                    cerrarModalProducto();
+
+                }
+
+            }
+        );
+
+
+        document.getElementById(
+            "modalVer"
+        ).addEventListener(
+            "click",
+            function(e) {
+
+                if (e.target === this) {
+
+                    cerrarModalVer();
+
+                }
+
+            }
+        );
+
+
+        document.getElementById(
+            "modalImagen"
+        ).addEventListener(
+            "click",
+            function(e) {
+
+                if (e.target === this) {
+
+                    cerrarModalImagen();
+
+                }
+
+            }
+        );
+
+
+        // =====================================================
+        // INICIO
+        // =====================================================
+
+        cargarProductos();
+
+    </script>
+
+</body>
+
+</html>

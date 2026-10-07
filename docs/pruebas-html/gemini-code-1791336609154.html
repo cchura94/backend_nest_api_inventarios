@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Productos</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SweetAlert2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- FontAwesome CDN para iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans">
+
+  <!-- Header -->
+  <header class="bg-indigo-600 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold flex items-center gap-2">
+        <i class="fa-solid fa-boxes-packing"></i> Catálogo de Productos
+      </h1>
+      <button onclick="openModal('create')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-4 py-2 rounded-lg transition flex items-center gap-2 shadow-sm">
+        <i class="fa-solid fa-plus"></i> Nuevo Producto
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- Filtros y Búsqueda -->
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6">
+      <form id="filterForm" onsubmit="event.preventDefault(); loadProducts(1);" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Buscar</label>
+          <div class="relative">
+            <input type="text" id="filterSearch" placeholder="Nombre, marca, código..." class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Estado</label>
+          <select id="filterEstado" class="w-full py-2 px-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+            <option value="">Todos</option>
+            <option value="true">Activos</option>
+            <option value="false">Inactivos</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Por Página</label>
+          <select id="filterLimit" onchange="loadProducts(1)" class="w-full py-2 px-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+            <option value="5">5 registros</option>
+            <option value="10" selected>10 registros</option>
+            <option value="20">20 registros</option>
+          </select>
+        </div>
+
+        <div class="flex items-end gap-2">
+          <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition text-sm">
+            Filtrar
+          </button>
+          <button type="button" onclick="resetFilters()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2 px-3 rounded-lg transition text-sm">
+            <i class="fa-solid fa-rotate-right"></i>
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Tabla de Productos -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-xs">
+            <tr>
+              <th class="py-3 px-4">Imagen</th>
+              <th class="py-3 px-4">Producto</th>
+              <th class="py-3 px-4">Código / Marca</th>
+              <th class="py-3 px-4">Categoría</th>
+              <th class="py-3 px-4 text-right">Precio</th>
+              <th class="py-3 px-4 text-center">Estado</th>
+              <th class="py-3 px-4 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="productsTableBody" class="divide-y divide-slate-100">
+            <!-- Cargado vía JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <span class="text-xs text-slate-500" id="paginationInfo">Cargando...</span>
+        <div class="flex items-center gap-1" id="paginationControls">
+          <!-- Botones de paginación vía JS -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal para Crear / Editar Producto -->
+  <div id="productModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+        <h2 id="modalTitle" class="text-lg font-bold text-slate-800">Nuevo Producto</h2>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="productForm" onsubmit="saveProduct(event)" class="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="hidden" id="prodId">
+
+        <div class="md:col-span-2">
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nombre *</label>
+          <input type="text" id="prodNombre" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Descripción</label>
+          <textarea id="prodDescripcion" rows="2" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Código de Barra</label>
+          <input type="text" id="prodCodigoBarra" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Marca</label>
+          <input type="text" id="prodMarca" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Unidad de Medida</label>
+          <input type="text" id="prodUnidadMedida" placeholder="kg, unidad, lt..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Precio Venta *</label>
+          <input type="number" step="0.01" id="prodPrecio" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">ID Categoría *</label>
+          <input type="number" id="prodCategoriaId" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Ruta de Imagen (Texto opcional)</label>
+          <input type="text" id="prodImagen" placeholder="uploads/productos/ejemplo.jpg" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div class="md:col-span-2 flex items-center gap-2 mt-2">
+          <input type="checkbox" id="prodEstado" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" checked>
+          <label for="prodEstado" class="text-sm font-medium text-slate-700">Producto Activo</label>
+        </div>
+
+        <div class="md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t border-slate-100">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 transition text-sm">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition text-sm font-medium">Guardar</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Modal para Subir/Actualizar Imagen (POST con File Input) -->
+  <div id="imageModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+        <h2 class="text-lg font-bold text-slate-800">Subir Nueva Imagen</h2>
+        <button onclick="closeImageModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="imageForm" onsubmit="uploadImageFile(event)" class="p-6 space-y-4">
+        <input type="hidden" id="imgProdId">
+
+        <!-- Previsualización -->
+        <div class="flex flex-col items-center justify-center">
+          <div class="w-36 h-36 border-2 border-dashed border-slate-300 rounded-xl overflow-hidden bg-slate-50 flex items-center justify-center relative mb-1">
+            <img id="imagePreview" src="" alt="Vista previa" class="w-full h-full object-cover hidden">
+            <div id="previewPlaceholder" class="text-center text-slate-400 p-2">
+              <i class="fa-solid fa-cloud-arrow-up text-3xl mb-1"></i>
+              <p class="text-xs">Selecciona un archivo</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input File -->
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Archivo de Imagen</label>
+          <input type="file" id="imgFileInput" accept="image/*" required onchange="handleFilePreview(event)" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border border-slate-200 rounded-lg p-1">
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" onclick="closeImageModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 transition text-sm">Cancelar</button>
+          <button type="submit" id="btnUploadImage" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition text-sm font-medium flex items-center gap-2">
+            <i class="fa-solid fa-upload"></i> Subir (POST)
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3000/producto';
+    let currentPage = 1;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadProducts(currentPage);
+    });
+
+    // 1. Cargar productos (GET)
+    async function loadProducts(page = 1) {
+      currentPage = page;
+      const search = document.getElementById('filterSearch').value;
+      const estado = document.getElementById('filterEstado').value;
+      const limit = document.getElementById('filterLimit').value;
+
+      const params = new URLSearchParams({ page, limit });
+      if (search) params.append('search', search);
+      if (estado !== '') params.append('estado', estado);
+
+      try {
+        const res = await fetch(`${API_URL}?${params.toString()}`);
+        const data = await res.json();
+
+        const products = Array.isArray(data) ? data : (data.data || data.items || []);
+        const total = data.total || products.length;
+
+        renderTable(products);
+        renderPagination(total, limit, page);
+      } catch (err) {
+        console.error(err);
+        Swal.fire('Error', 'No se pudieron cargar los productos.', 'error');
+      }
+    }
+
+    // Renderizar Filas de Tabla
+    function renderTable(products) {
+      const tbody = document.getElementById('productsTableBody');
+      tbody.innerHTML = '';
+
+      if (products.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center py-8 text-slate-400">
+              <i class="fa-solid fa-box-open text-3xl mb-2 block"></i>
+              No se encontraron productos.
+            </td>
+          </tr>`;
+        return;
+      }
+
+      products.forEach(p => {
+        const imgUrl = p.imagen 
+          ? (p.imagen.startsWith('http') ? p.imagen : `http://localhost:3000/${p.imagen}`) 
+          : 'https://via.placeholder.com/50';
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="py-3 px-4">
+              <div class="relative group w-12 h-12">
+                <img src="${imgUrl}" alt="${p.nombre}" class="w-12 h-12 rounded-lg object-cover border border-slate-200" onerror="this.src='https://via.placeholder.com/50'">
+                <button onclick="openImageModal(${p.id}, '${imgUrl}')" class="absolute inset-0 bg-slate-900/60 text-white rounded-lg opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-xs" title="Subir Imagen">
+                  <i class="fa-solid fa-camera"></i>
+                </button>
+              </div>
+            </td>
+            <td class="py-3 px-4">
+              <div class="font-bold text-slate-800">${p.nombre}</div>
+              <div class="text-xs text-slate-400 truncate max-w-xs">${p.descripcion || '-'}</div>
+            </td>
+            <td class="py-3 px-4 text-xs">
+              <div><span class="font-semibold text-slate-600">CB:</span> ${p.codigo_barra || '-'}</div>
+              <div><span class="font-semibold text-slate-600">Marca:</span> ${p.marca || '-'}</div>
+            </td>
+            <td class="py-3 px-4 text-xs">
+              <span class="bg-indigo-50 text-indigo-700 font-medium px-2.5 py-1 rounded-full border border-indigo-100">
+                ${p.categoria ? p.categoria.nombre || `Cat #${p.categoria.id || p.categoria}` : 'Sin Cat'}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-right font-bold text-slate-700">
+              $${Number(p.precio_venta_actual).toFixed(2)}
+              <span class="text-xs text-slate-400 font-normal">/ ${p.unidad_medida || 'unid'}</span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${p.estado ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                ${p.estado ? 'Activo' : 'Inactivo'}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <div class="flex items-center justify-center gap-2">
+                <button onclick="editProduct(${JSON.stringify(p).replace(/"/g, '&quot;')})" class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Editar">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    // Paginación
+    function renderPagination(total, limit, page) {
+      const totalPages = Math.ceil(total / limit) || 1;
+      document.getElementById('paginationInfo').innerText = `Mostrando página ${page} de ${totalPages} (Total: ${total} registros)`;
+      
+      const controls = document.getElementById('paginationControls');
+      controls.innerHTML = '';
+
+      controls.innerHTML += `
+        <button onclick="loadProducts(${page - 1})" ${page === 1 ? 'disabled class="px-3 py-1 bg-slate-100 text-slate-300 rounded cursor-not-allowed"' : 'class="px-3 py-1 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded transition"'}>
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+      `;
+
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === page) {
+          controls.innerHTML += `<button class="px-3 py-1 bg-indigo-600 text-white rounded font-bold">${i}</button>`;
+        } else if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) {
+          controls.innerHTML += `<button onclick="loadProducts(${i})" class="px-3 py-1 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded transition">${i}</button>`;
+        }
+      }
+
+      controls.innerHTML += `
+        <button onclick="loadProducts(${page + 1})" ${page >= totalPages ? 'disabled class="px-3 py-1 bg-slate-100 text-slate-300 rounded cursor-not-allowed"' : 'class="px-3 py-1 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded transition"'}>
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      `;
+    }
+
+    function resetFilters() {
+      document.getElementById('filterSearch').value = '';
+      document.getElementById('filterEstado').value = '';
+      document.getElementById('filterLimit').value = '10';
+      loadProducts(1);
+    }
+
+    // 2. Guardar producto (POST / PATCH JSON)
+    async function saveProduct(e) {
+      e.preventDefault();
+
+      const id = document.getElementById('prodId').value;
+      const body = {
+        nombre: document.getElementById('prodNombre').value,
+        descripcion: document.getElementById('prodDescripcion').value,
+        codigo_barra: document.getElementById('prodCodigoBarra').value || null,
+        unidad_medida: document.getElementById('prodUnidadMedida').value || null,
+        marca: document.getElementById('prodMarca').value || null,
+        precio_venta_actual: parseFloat(document.getElementById('prodPrecio').value),
+        imagen: document.getElementById('prodImagen').value || null,
+        estado: document.getElementById('prodEstado').checked,
+        categoriaId: parseInt(document.getElementById('prodCategoriaId').value)
+      };
+
+      const url = id ? `${API_URL}/${id}` : API_URL;
+      const method = id ? 'PATCH' : 'POST';
+
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (!res.ok) throw new Error('Ocurrió un error al guardar el producto.');
+
+        Swal.fire('Éxito', `Producto ${id ? 'actualizado' : 'creado'} correctamente.`, 'success');
+        closeModal();
+        loadProducts(currentPage);
+      } catch (err) {
+        Swal.fire('Error', err.message, 'error');
+      }
+    }
+
+    // 3. Subir Imagen mediante POST y FormData
+    async function uploadImageFile(e) {
+      e.preventDefault();
+      const id = document.getElementById('imgProdId').value;
+      const fileInput = document.getElementById('imgFileInput');
+
+      if (!fileInput.files || fileInput.files.length === 0) {
+        Swal.fire('Atención', 'Selecciona un archivo de imagen.', 'warning');
+        return;
+      }
+
+      // Preparación de datos multipart/form-data
+      const formData = new FormData();
+      formData.append('imagen', fileInput.files[0]);
+
+      try {
+        // Petición con método POST
+        const res = await fetch(`${API_URL}/${id}/actualizar-imagen`, {
+          method: 'POST',
+          body: formData
+          // Nota: No se agrega 'Content-Type', el navegador adjunta automáticamente el boundary.
+        });
+
+        if (!res.ok) throw new Error('Ocurrió un error al subir la imagen.');
+
+        Swal.fire('¡Éxito!', 'La imagen ha sido subida con éxito.', 'success');
+        closeImageModal();
+        loadProducts(currentPage);
+      } catch (err) {
+        Swal.fire('Error', err.message, 'error');
+      }
+    }
+
+    // Previsualizar la imagen seleccionada localmente
+    function handleFilePreview(e) {
+      const file = e.target.files[0];
+      const preview = document.getElementById('imagePreview');
+      const placeholder = document.getElementById('previewPlaceholder');
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          preview.src = evt.target.result;
+          preview.classList.remove('hidden');
+          placeholder.classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Manejo de Modales
+    function openModal(mode, product = null) {
+      document.getElementById('productForm').reset();
+      document.getElementById('prodId').value = '';
+
+      if (mode === 'edit' && product) {
+        document.getElementById('modalTitle').innerText = 'Editar Producto';
+        document.getElementById('prodId').value = product.id;
+        document.getElementById('prodNombre').value = product.nombre;
+        document.getElementById('prodDescripcion').value = product.descripcion || '';
+        document.getElementById('prodCodigoBarra').value = product.codigo_barra || '';
+        document.getElementById('prodMarca').value = product.marca || '';
+        document.getElementById('prodUnidadMedida').value = product.unidad_medida || '';
+        document.getElementById('prodPrecio').value = product.precio_venta_actual;
+        document.getElementById('prodImagen').value = product.imagen || '';
+        document.getElementById('prodEstado').checked = product.estado;
+        document.getElementById('prodCategoriaId').value = product.categoria ? (product.categoria.id || product.categoria) : '';
+      } else {
+        document.getElementById('modalTitle').innerText = 'Nuevo Producto';
+      }
+
+      const modal = document.getElementById('productModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('productModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function editProduct(product) {
+      openModal('edit', product);
+    }
+
+    function openImageModal(id, currentImgUrl) {
+      document.getElementById('imageForm').reset();
+      document.getElementById('imgProdId').value = id;
+      
+      const preview = document.getElementById('imagePreview');
+      const placeholder = document.getElementById('previewPlaceholder');
+
+      if (currentImgUrl && !currentImgUrl.includes('placeholder')) {
+        preview.src = currentImgUrl;
+        preview.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+      } else {
+        preview.src = '';
+        preview.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+      }
+
+      const modal = document.getElementById('imageModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeImageModal() {
+      const modal = document.getElementById('imageModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  </script>
+</body>
+</html>
