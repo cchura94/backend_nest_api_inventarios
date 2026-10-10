@@ -58,11 +58,11 @@ export class MovimientoDto{
 
 export class CreateNotaDto {
 
-    @ApiProperty({
-        example: '2026-10-06'
-    })
+    
+    /*
     @IsString()
-    fecha: string;
+    fecha?: string;
+    */
 
     @ApiProperty({
         example: 'compra'
@@ -70,13 +70,15 @@ export class CreateNotaDto {
     @IsString()
     tipo_nota: 'compra' | 'venta' | 'devolucion'
 
-    @IsNumber()
-    clienteproveedor_id: number;
-
     @ApiProperty({
         example: 1
     })
-    user_id: number;
+    @IsNumber()
+    clienteproveedor_id: number;
+
+    /*
+    @IsNumber()
+    user_id?: number;
 
     @ApiPropertyOptional({
         example: 'pendiente'
@@ -84,6 +86,7 @@ export class CreateNotaDto {
     @IsOptional()
     @IsString()
     estado_nota: string;
+    */
 
     @ApiPropertyOptional({
         example: 'Observaciones generales de la nota'
