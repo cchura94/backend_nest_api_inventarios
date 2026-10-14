@@ -1,0 +1,101 @@
+@host = http://127.0.0.1:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImVtYWlsIjoiYW5hQG1haWwuY29tIiwiaWF0IjoxNzkxMjQ5NzA4LCJleHAiOjE3OTEyNTY5MDh9.DvBH001tLq8M5fsc01DtR5Wu9YMv2VxnST2nnOL3t-A
+
+### Listar notas
+GET {{host}}/nota
+Authorization: Bearer {{token}}
+
+### Listar notas con filtros y paginación
+# Query params:
+#   page, limit
+#   search (observaciones o razón social del cliente/proveedor)
+#   tipo_nota (compra | venta | devolucion)
+#   estado_nota (pendiente | aprobada | anulada)
+#   clienteproveedor_id
+#   fecha_inicio / fecha_fin (YYYY-MM-DD)
+GET {{host}}/nota?page=1&limit=10&tipo_nota=compra&estado_nota=aprobada&clienteproveedor_id=1&search=mercadería&fecha_inicio=2026-01-01&fecha_fin=2026-12-31
+Authorization: Bearer {{token}}
+
+### Guardar nota (compra) - crea movimientos y actualiza stock
+POST {{host}}/nota
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "tipo_nota": "compra",
+  "clienteproveedor_id": 1,
+  "observaciones": "Compra de mercadería",
+  "movimientos": [
+    {
+      "producto_id": 10,
+      "almacen_id": 1,
+      "cantidad": 5,
+      "tipo_movimiento": "ingreso",
+      "precio_compra": 235.2,
+      "precio_venta": 235.2,
+      "observaciones": "Movimiento generado por compra"
+    }
+  ]
+}
+
+### Guardar nota (venta) con salida
+POST {{host}}/nota
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "tipo_nota": "venta",
+  "clienteproveedor_id": 1,
+  "observaciones": "Venta de mercadería",
+  "movimientos": [
+    {
+      "producto_id": 10,
+      "almacen_id": 1,
+      "cantidad": 2,
+      "tipo_movimiento": "salida",
+      "precio_venta": 260.0,
+      "observaciones": "Salida por venta"
+    }
+  ]
+}
+
+### Mostrar
+GET {{host}}/nota/1
+Authorization: Bearer {{token}}
+
+### Mostrar inexistente -> 404
+GET {{host}}/nota/9999
+Authorization: Bearer {{token}}
+
+### Modificar datos de la nota
+PATCH {{host}}/nota/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "observaciones": "Compra de mercadería actualizada",
+  "estado_nota": "aprobada"
+}
+
+### Modificar reemplazando movimientos (revierte y recalcula stock)
+PATCH {{host}}/nota/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "movimientos": [
+    {
+      "producto_id": 10,
+      "almacen_id": 1,
+      "cantidad": 3,
+      "tipo_movimiento": "ingreso",
+      "precio_compra": 240.0,
+      "precio_venta": 240.0,
+      "observaciones": "Ajuste de compra"
+    }
+  ]
+}
+
+### Eliminar (revierte stock de sus movimientos)
+DELETE {{host}}/nota/1
+Authorization: Bearer {{token}}
