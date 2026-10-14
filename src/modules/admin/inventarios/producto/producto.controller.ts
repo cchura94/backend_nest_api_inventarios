@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile, UseGuards } from '@nestjs/common';
 import { ProductoService } from './producto.service.js';
 import { CreateProductoDto } from './dto/create-producto.dto.js';
 import { UpdateProductoDto } from './dto/update-producto.dto.js';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { AuthGuard } from '../../../auth/auth.guard.js';
 
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @Controller('producto')
 export class ProductoController {
   constructor(private readonly productoService: ProductoService) {}

@@ -11,6 +11,8 @@ import { Almacen } from '../inventarios/almacen/entities/almacen.entity.js';
 import { Movimiento } from './entities/movimiento.entity.js';
 import type { QueryRunner } from 'typeorm';
 import { AlmacenProducto } from '../inventarios/almacen/entities/almacen_producto.entity.js';
+import PDFDocument from 'pdfkit'
+import {Response} from 'express'
 
 @Injectable()
 export class NotaService {
@@ -336,4 +338,408 @@ export class NotaService {
 
     await almacenProductoRepo.save(ap);
   }
+
+
+  async funGenerarReportePDFPorID(id: number, res: Response) {
+  const nota = await this.notaRepository
+    .createQueryBuilder('nota')
+    .leftJoinAndSelect('nota.user', 'user')
+    .leftJoinAndSelect('nota.clienteproveedor', 'clienteproveedor')
+    .leftJoinAndSelect('nota.movimientos', 'movimientos')
+    .leftJoinAndSelect('movimientos.producto', 'producto')
+    .where('nota.id = :id', { id })
+    .getOne();
+
+  if (!nota) {
+    throw new NotFoundException('La nota no existe');
+  }
+
+  const doc = new PDFDocument({
+    size: 'A4',
+    margins: {
+      top: 40,
+      bottom: 40,
+      left: 40,
+      right: 40,
+    },
+    bufferPages: true,
+    info: {
+      Title: `Comprobante de ${nota.tipo_nota} N° ${nota.id}`,
+      Author: 'Sistema de inventario',
+    },
+  });
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename=comprobante_${nota.id}.pdf`,
+  );
+
+  doc.pipe(res);
+
+  // Configuración general
+  const pageWidth = doc.page.width;
+  const pageHeight = doc.page.height;
+  const margin = 40;
+  const contentWidth = pageWidth - margin * 2;
+  const blue = '#0B5394';
+  const gray = '#F2F4F7';
+  const textColor = '#333333';
+
+  const moneda = (valor: number | string) =>
+    new Intl.NumberFormat('es-BO', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(Number(valor) || 0);
+
+  const fecha = new Date(nota.fecha).toLocaleString('es-BO', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
+  // Compra: precio de compra. Venta: precio de venta.
+  const movimientos = nota.movimientos ?? [];
+
+  const items = movimientos.map((movimiento) => {
+    const precioUnitario =
+      nota.tipo_nota === 'compra'
+        ? Number(movimiento.precio_compra)
+        : Number(movimiento.precio_venta);
+
+    const cantidad = Number(movimiento.cantidad) || 0;
+
+    return {
+      nombre: movimiento.producto?.nombre ?? 'Producto sin nombre',
+      unidad: movimiento.producto?.unidad_medida ?? '',
+      cantidad,
+      precioUnitario: Number.isFinite(precioUnitario)
+        ? precioUnitario
+        : 0,
+      subtotal:
+        cantidad *
+        (Number.isFinite(precioUnitario) ? precioUnitario : 0),
+    };
+  });
+
+  const total = items.reduce((suma, item) => suma + item.subtotal, 0);
+
+  // Encabezado del comprobante
+  const dibujarEncabezado = () => {
+    doc
+      .font('Helvetica-Bold')
+      .fontSize(22)
+      .fillColor(blue)
+      .text('COMPROBANTE', margin, 40, {
+        width: contentWidth,
+        align: 'center',
+      });
+
+    doc
+      .font('Helvetica-Bold')
+      .fontSize(13)
+      .fillColor(textColor)
+      .text(
+        nota.tipo_nota === 'compra'
+          ? 'COMPROBANTE DE COMPRA'
+          : 'COMPROBANTE DE VENTA',
+        margin,
+        72,
+        { width: contentWidth, align: 'center' },
+      );
+
+    doc
+      .moveTo(margin, 98)
+      .lineTo(pageWidth - margin, 98)
+      .strokeColor(blue)
+      .lineWidth(1.5)
+      .stroke();
+
+    doc
+      .font('Helvetica-Bold')
+      .fontSize(10)
+      .fillColor(textColor)
+      .text(`N.º de comprobante: ${nota.id}`, margin, 110);
+
+    doc
+      .font('Helvetica')
+      .fontSize(10)
+      .text(`Fecha: ${fecha}`, margin, 126);
+
+    doc
+      .font('Helvetica')
+      .text(
+        `Estado: ${nota.estado_nota ?? 'Sin estado'}`,
+        margin,
+        142,
+      );
+
+    doc
+      .font('Helvetica-Bold')
+      .fontSize(11)
+      .fillColor(blue)
+      .text('DATOS DEL CLIENTE / PROVEEDOR', margin, 170);
+
+    const persona = nota.clienteproveedor;
+
+    doc
+      .font('Helvetica')
+      .fontSize(10)
+      .fillColor(textColor)
+      .text(
+        `Razón social: ${persona?.razon_social ?? 'No especificado'}`,
+        margin,
+        190,
+        { width: contentWidth },
+      );
+
+    doc.text(
+      `Identificación: ${persona?.identificacion ?? 'No especificada'}`,
+      margin,
+      206,
+      { width: contentWidth },
+    );
+
+    doc.text(
+      `Dirección: ${persona?.direccion ?? 'No especificada'}`,
+      margin,
+      222,
+      { width: contentWidth },
+    );
+
+    doc.text(
+      `Teléfono: ${persona?.telefono ?? 'No especificado'}`,
+      margin,
+      238,
+      { width: contentWidth },
+    );
+
+    doc.text(
+      `Atendido por: ${nota.user?.name ?? 'No especificado'}`,
+      margin,
+      254,
+      { width: contentWidth },
+    );
+  };
+
+  // Columnas de la tabla
+  const columnas = [
+    { titulo: 'N.º', ancho: 30, align: 'left' as const },
+    { titulo: 'Producto', ancho: 190, align: 'left' as const },
+    { titulo: 'Cant.', ancho: 55, align: 'right' as const },
+    { titulo: 'P. unitario', ancho: 100, align: 'right' as const },
+    { titulo: 'Subtotal', ancho: 90, align: 'right' as const },
+  ];
+
+  const tableWidth = columnas.reduce(
+    (suma, columna) => suma + columna.ancho,
+    0,
+  );
+
+  const dibujarCabeceraTabla = (y: number) => {
+    doc.rect(margin, y, tableWidth, 25).fill(blue);
+
+    let x = margin;
+
+    columnas.forEach((columna) => {
+      doc
+        .font('Helvetica-Bold')
+        .fontSize(9)
+        .fillColor('#FFFFFF')
+        .text(columna.titulo, x + 4, y + 8, {
+          width: columna.ancho - 8,
+          align: columna.align,
+        });
+
+      x += columna.ancho;
+    });
+
+    return y + 25;
+  };
+
+  dibujarEncabezado();
+
+  let y = dibujarCabeceraTabla(285);
+
+  // Filas de productos
+  items.forEach((item, index) => {
+    const nombre = item.unidad
+      ? `${item.nombre} (${item.unidad})`
+      : item.nombre;
+
+    const alturaNombre = doc
+      .font('Helvetica')
+      .fontSize(9)
+      .heightOfString(nombre, {
+        width: columnas[1].ancho - 8,
+      });
+
+    const rowHeight = Math.max(25, alturaNombre + 12);
+
+    // Salto de página si la fila no cabe
+    if (y + rowHeight > pageHeight - 100) {
+      doc.addPage();
+      y = 45;
+      y = dibujarCabeceraTabla(y);
+    }
+
+    if (index % 2 === 0) {
+      doc.rect(margin, y, tableWidth, rowHeight).fill(gray);
+    }
+
+    let x = margin;
+
+    const valores = [
+      String(index + 1),
+      nombre,
+      moneda(item.cantidad),
+      moneda(item.precioUnitario),
+      moneda(item.subtotal),
+    ];
+
+    doc.fillColor(textColor);
+
+    columnas.forEach((columna, i) => {
+      doc
+        .font('Helvetica')
+        .fontSize(9)
+        .text(valores[i], x + 4, y + 6, {
+          width: columna.ancho - 8,
+          align: columna.align,
+          height: rowHeight - 8,
+        });
+
+      x += columna.ancho;
+    });
+
+    doc
+      .moveTo(margin, y + rowHeight)
+      .lineTo(margin + tableWidth, y + rowHeight)
+      .strokeColor('#D9DEE5')
+      .lineWidth(0.5)
+      .stroke();
+
+    y += rowHeight;
+  });
+
+  // Espacio para el total; crear otra página si hace falta
+  if (y + 65 > pageHeight - 40) {
+    doc.addPage();
+    y = 45;
+  }
+
+  y += 15;
+
+  doc
+    .font('Helvetica-Bold')
+    .fontSize(12)
+    .fillColor(blue)
+    .text('TOTAL GENERAL:', margin, y, {
+      width: tableWidth - 110,
+      align: 'right',
+    });
+
+  doc.text(`Bs ${moneda(total)}`, margin + tableWidth - 105, y, {
+    width: 105,
+    align: 'right',
+  });
+
+  y += 35;
+
+  // Observaciones
+  const observaciones = nota.observaciones?.trim();
+
+  if (observaciones) {
+    if (y + 65 > pageHeight - 40) {
+      doc.addPage();
+      y = 45;
+    }
+
+    doc
+      .font('Helvetica-Bold')
+      .fontSize(10)
+      .fillColor(blue)
+      .text('OBSERVACIONES', margin, y);
+
+    y += 16;
+
+    doc
+      .font('Helvetica')
+      .fontSize(9)
+      .fillColor(textColor)
+      .text(observaciones, margin, y, {
+        width: contentWidth,
+      });
+
+    y = doc.y + 25;
+  }
+
+  // Firmas
+  if (y + 65 > pageHeight - 40) {
+    doc.addPage();
+    y = 45;
+  }
+
+  y += 30;
+
+  const firmaWidth = 180;
+  const firmaDerecha = pageWidth - margin - firmaWidth;
+
+  doc
+    .moveTo(margin, y + 25)
+    .lineTo(margin + firmaWidth, y + 25)
+    .strokeColor('#777777')
+    .stroke();
+
+  doc
+    .moveTo(firmaDerecha, y + 25)
+    .lineTo(firmaDerecha + firmaWidth, y + 25)
+    .stroke();
+
+  doc
+    .font('Helvetica')
+    .fontSize(9)
+    .fillColor(textColor)
+    .text('Entregado por', margin, y + 31, {
+      width: firmaWidth,
+      align: 'center',
+    });
+
+  doc.text('Recibido por', firmaDerecha, y + 31, {
+    width: firmaWidth,
+    align: 'center',
+  });
+
+  // Numeración de todas las páginas
+  const rangoPaginas = doc.bufferedPageRange();
+
+  for (
+    let pagina = rangoPaginas.start;
+    pagina < rangoPaginas.start + rangoPaginas.count;
+    pagina++
+  ) {
+    doc.switchToPage(pagina);
+
+    doc
+      .font('Helvetica')
+      .fontSize(8)
+      .fillColor('#777777')
+      .text(
+        `Comprobante N.º ${nota.id} | Página ${pagina + 1} de ${rangoPaginas.count}`,
+        margin,
+        pageHeight - 28,
+        {
+          width: contentWidth,
+          align: 'center',
+          lineBreak: false,
+        },
+      );
+  }
+
+  doc.end();
+}
+
 }

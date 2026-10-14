@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Request, UseGuards, Res } from '@nestjs/common';
 import { NotaService } from './nota.service.js';
 import { CreateNotaDto } from './dto/create-nota.dto.js';
 import { UpdateNotaDto } from './dto/update-nota.dto.js';
@@ -52,5 +52,10 @@ export class NotaController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.notaService.remove(+id);
+  }
+
+  @Get("/:id/generar-recibo-pdf")
+  funOneReportePDF(@Param('id') id: number, @Res() res: any){
+    return this.notaService.funGenerarReportePDFPorID(id, res)
   }
 }
